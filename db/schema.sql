@@ -1,0 +1,53 @@
+-- 배송조회 (Delivery Tracking) — Oracle XE 스키마 + 공통코드 시드
+-- 실행 예: sqlplus 계정/비번 @db/schema.sql   (또는 SQL Developer 에서 실행)
+
+-- 1) 회원
+CREATE TABLE USR_BASE (
+    USR_ID        VARCHAR2(50)  NOT NULL,
+    PASS_WD       VARCHAR2(200) NOT NULL,
+    USR_NM        VARCHAR2(50),
+    USR_PHONE     VARCHAR2(20),
+    USR_EMAIL     VARCHAR2(100),
+    USR_BIRTH     VARCHAR2(20),
+    USR_ROLE      VARCHAR2(20)  DEFAULT 'USER',
+    SYS_REG_DTIME DATE          DEFAULT SYSDATE,
+    SYS_MOD_DTIME DATE,
+    CONSTRAINT PK_USR_BASE PRIMARY KEY (USR_ID)
+);
+
+-- 2) 배송 레코드 — 폴링 시점마다 적재하고 조회 시 MAX(DLV_STAT)로 최신 상태를 집계
+CREATE TABLE DLV_INFO (
+    TRCK_NUM      VARCHAR2(50)  NOT NULL,
+    USR_ID        VARCHAR2(50)  NOT NULL,
+    DLV_STAT      VARCHAR2(10),                 -- 00 등록 / 01~04 준비 / 05 배송중 / 06 완료
+    GOODS_NM      VARCHAR2(200),
+    DLV_CORP_CD   VARCHAR2(10),                 -- STD_CD.GRP_CD = 'DLV001'
+    SHOP_CODE     VARCHAR2(20),                 -- STD_CD.GRP_CD = 'DLV002'
+    SYS_REG_ID    VARCHAR2(50),
+    SYS_REG_DTIME DATE          DEFAULT SYSDATE
+);
+CREATE INDEX IX_DLV_INFO_USR ON DLV_INFO (USR_ID, TRCK_NUM);
+
+-- 3) 공통코드 (택배사 / 쇼핑몰)
+CREATE TABLE STD_CD (
+    GRP_CD VARCHAR2(10) NOT NULL,
+    CD     VARCHAR2(10) NOT NULL,
+    CD_NM  VARCHAR2(50) NOT NULL,
+    CONSTRAINT PK_STD_CD PRIMARY KEY (GRP_CD, CD)
+);
+
+-- 택배사 (DLV001) — SweetTracker t_code 기준
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV001', '01', '우체국택배');
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV001', '04', 'CJ대한통운');
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV001', '05', '한진택배');
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV001', '06', '로젠택배');
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV001', '08', '롯데택배');
+
+-- 쇼핑몰 (DLV002)
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV002', 'C001', '쿠팡');
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV002', 'N001', '네이버쇼핑');
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV002', 'S001', '11번가');
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV002', 'G001', 'G마켓');
+INSERT INTO STD_CD (GRP_CD, CD, CD_NM) VALUES ('DLV002', 'M001', '무신사');
+
+COMMIT;

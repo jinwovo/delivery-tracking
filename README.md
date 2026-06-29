@@ -69,11 +69,12 @@ flowchart LR
 ## 실행
 
 ```bash
-# 1) Oracle XE 에 스키마 생성: USR_BASE / DLV_INFO / STD_CD
+# 1) Oracle XE 에 스키마 + 공통코드 생성
+sqlplus 계정/비번 @db/schema.sql
 # 2) DB 접속정보 설정
 #    hycuProject/src/main/webapp/WEB-INF/spring/root-context.xml
-# 3) SweetTracker API 키 설정
-#    DlvController 의 apiKey (발급: https://tracking.sweettracker.co.kr)
+# 3) SweetTracker API 키 설정 (DlvController.TRACKING_API_KEY)
+#    발급: https://tracking.sweettracker.co.kr
 # 4) 빌드 & 배포
 mvn clean package          # → target/controller.war
 # controller.war 를 Tomcat 8.5 webapps 에 배포 (Java 8)

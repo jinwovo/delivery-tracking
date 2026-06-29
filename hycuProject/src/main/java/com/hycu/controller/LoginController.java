@@ -35,8 +35,6 @@ public class LoginController {
     private DlvController dlvController; // DlvController 주입
     @Autowired
     private MemberMapper membermapper;
-    
-    private HttpServletResponse response;
 
     private final MemberService memberService;
     private AuthenticationService authenticationService;
@@ -104,7 +102,6 @@ public class LoginController {
             DlvVO dlvCount = dlvService.getDlvMainCount(userId); // 메인화면 배송건수 표시
             model.addAttribute("dlvCount", dlvCount);
 
-            //dlvController.NaverTrack(session); // DlvController의 NaverTrack 메서드 호출
             dlvController.trackDeliveryList(session);
 
             return "/main";
