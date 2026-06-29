@@ -24,4 +24,13 @@ public class MemberServiceImpl implements MemberService {
         return memberMapper.getMemberById(userId);
     }
 
+    @Override
+    public boolean register(MemberVO member) {
+        if (memberMapper.getMemberById(member.getUsrId()) != null) {
+            return false;
+        }
+        memberMapper.insertUsrBase(member);
+        return true;
+    }
+
 }

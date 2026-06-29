@@ -48,5 +48,10 @@ public class DlvServiceImpl implements DlvService {
 	public List<DlvVO> getTrckNum(String userId) {
         return dlvMapper.getTrckNum(userId);
 	}
-    
+
+	@Override
+	public void saveDelivery(DlvVO dlv) {
+		dlvMapper.insertDlvInfo(dlv);
+	}
+
 }

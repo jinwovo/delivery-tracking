@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -15,6 +16,9 @@
       </div>
       <h1>회원가입</h1>
       <p class="tag">30초면 시작할 수 있어요</p>
+      <c:if test="${not empty error}">
+        <div style="background:var(--bad-bg);color:var(--bad);padding:11px 14px;border-radius:10px;font-size:13.5px;font-weight:600;margin-bottom:16px;text-align:center;">${error}</div>
+      </c:if>
       <form action="/sign" method="post">
         <div class="field">
           <label for="usrId">아이디</label>

@@ -16,4 +16,7 @@ public interface DlvService {
 	DlvVO getDlvMainCount(String userId);
 
 	List<DlvVO> getTrckNum(String userId);
+
+	/** 배송 레코드 1건 적재 (폴링 시점마다 append). */
+	void saveDelivery(DlvVO dlv);
 }

@@ -52,10 +52,11 @@
 ```mermaid
 flowchart LR
     U[사용자] -->|JSP / app.css| C[Controller<br/>Login·Main·Dlv]
-    C --> S[Service]
+    C --> S[Service<br/>Tracking·Dlv·Member]
+    S --> CL[SweetTrackerClient]
+    CL -->|REST| API[SweetTracker API]
     S --> M[(MyBatis Mapper)]
     M --> O[(Oracle<br/>USR_BASE·DLV_INFO·STD_CD)]
-    C -->|REST| API[SweetTracker API]
 ```
 
 **데이터 모델**
