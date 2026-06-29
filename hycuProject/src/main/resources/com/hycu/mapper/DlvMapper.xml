@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hycu.mapper.DlvMapper">
+
+    <insert id="insertDlvInfo" parameterType="com.hycu.model.DlvVO">
+        INSERT INTO DLV_INFO (
+        	 TRCK_NUM
+        	,USR_ID
+        	,DLV_STAT		
+        	,GOODS_NM
+        	,DLV_CORP_CD
+        	,SHOP_CODE
+        	,SYS_REG_ID
+        	,SYS_REG_DTIME
+        	)VALUES (
+        	 #{trckNum}
+        	,#{usrId}
+        	,#{dlvStat}
+        	,#{goodsNm}
+        	,#{dlvCompanyCode}
+        	,#{shopCode}
+        	,#{usrId}
+        	,SYSDATE
+        	)
+    </insert>
+    
+    <select id="selectDlvInfo" parameterType="com.hycu.model.DlvVO" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM DLV_INFO
+	    WHERE TRCK_NUM = #{trckNum}
+	    AND DLV_CORP_CD = #{dlvCompanyCode}
+	</select>
+	
+	<select id="getDlvCount" parameterType="com.hycu.model.DlvVO" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM DLV_INFO
+	    WHERE TRCK_NUM = #{trckNum}
+	    AND DLV_CORP_CD = #{dlvCompanyCode}
+	</select>
+	
+	<select id="selectDlvInfoList" resultType="com.hycu.model.DlvVO">
+		SELECT * FROM 
+        	(SELECT ROWNUM AS RN 
+        			,A.* 
+        			,TO_CHAR(B.SYS_REG_DTIME,'YYYY-MM-DD HH24:MI:SS') AS sysRegDtime 
+        			,TO_DATE(B.SYS_REG_DTIME,'YYYY-MM-DD HH24:MI:SS') - TO_DATE(SYSDATE,'YYYY-MM-DD HH24:MI:SS') AS sysRegDtime2 
+        	 FROM(SELECT  TRCK_NUM AS trckNum,
+						  USR_ID AS usrId,
+						  GOODS_NM AS goodsNm,
+						  DLV_CORP_CD AS dlvCompanyCode,
+						  MAX (DLV_STAT) AS dlvStat
+				  FROM DLV_INFO
+				  WHERE USR_ID = #{usrId}
+				  GROUP BY TRCK_NUM,
+				   		   USR_ID,
+						   GOODS_NM,
+						   DLV_CORP_CD
+				   ) A
+			  LEFT OUTER JOIN DLV_INFO B
+              ON B.TRCK_NUM = A.trckNum 
+              AND B.DLV_STAT = A.dlvStat
+			 )
+        WHERE RN <![CDATA[>]]> #{offset} AND RN <![CDATA[<=]]> #{offset} + #{limit}
+    </select>
+    
+	<select id="getDlvMainCount" resultType="com.hycu.model.DlvVO">
+		SELECT * FROM (
+			SELECT '06' AS dlvStat,COUNT(*) AS CNT
+			  FROM (SELECT * FROM (
+			        SELECT TRCK_NUM, MAX (DLV_STAT) AS DLV_STAT
+			          FROM DLV_INFO
+			         WHERE USR_ID = #{usrId}
+			         GROUP BY TRCK_NUM
+			         ) WHERE DLV_STAT = '06') A
+			UNION ALL
+			SELECT '04' AS dlvStat,COUNT(*) AS CNT
+			  FROM (SELECT * FROM (
+			        SELECT TRCK_NUM, MAX (DLV_STAT) AS DLV_STAT
+			          FROM DLV_INFO
+			         WHERE USR_ID = #{usrId}
+			         GROUP BY TRCK_NUM)
+			         WHERE DLV_STAT <![CDATA[<]]> 5) A
+			UNION ALL
+		 	SELECT '05' AS dlvStat,COUNT(*) AS CNT
+			  FROM (SELECT * FROM (
+			        SELECT TRCK_NUM, MAX (DLV_STAT) AS DLV_STAT
+			          FROM DLV_INFO
+			         WHERE USR_ID = #{usrId}
+			         GROUP BY TRCK_NUM)
+			         WHERE DLV_STAT = 5) A
+			UNION ALL
+			SELECT '07' AS dlvStat,COUNT(*) AS CNT
+			  FROM (SELECT DLV_STAT FROM DLV_INFO
+			        WHERE SYS_REG_DTIME <![CDATA[<]]> (SYSDATE-14) AND
+			             TRCK_NUM IN(
+			        SELECT TRCK_NUM FROM (
+			            SELECT TRCK_NUM, MAX (DLV_STAT) AS DLV_STAT
+			            FROM DLV_INFO
+			            WHERE USR_ID = #{usrId}
+			            GROUP BY TRCK_NUM    )
+			            WHERE  DLV_STAT <![CDATA[<=]]> 5 )
+			         ) A
+			       )
+			 PIVOT  (SUM(CNT) 
+			        FOR DLVSTAT IN ('04' AS dlvNotFin,'05' AS dlvNow,'06' AS dlvFin,'07' AS dlvStrange))
+	</select>    
+    <select id="getTotalRecords" resultType="int">
+   		 SELECT COUNT(*) FROM (
+   		     SELECT TRCK_NUM
+   		       FROM DLV_INFO
+   		      WHERE USR_ID = #{usrId}
+   		      GROUP BY TRCK_NUM
+   		 )
+	</select>
+    
+    <select id="getDlvCorp" resultType="com.hycu.model.DlvVO">
+    	SELECT CD AS dlvCompanyCode, CD_NM AS dlvCompanyName
+  		FROM STD_CD
+ 		WHERE GRP_CD = 'DLV001'
+	</select>
+	
+	<select id="getMallCorp" resultType="com.hycu.model.DlvVO">
+    	SELECT CD AS shopCode, CD_NM AS shopName
+  		FROM STD_CD
+ 		WHERE GRP_CD = 'DLV002'
+	</select>
+	
+	<select id="getTrckNum" resultType="com.hycu.model.DlvVO">
+        SELECT TRCK_NUM AS trckNum, 
+               DLV_CORP_CD AS dlvCompanyCode 
+        FROM DLV_INFO WHERE TRCK_NUM IN(
+        SELECT TRCK_NUM as trckNum
+		FROM DLV_INFO
+		WHERE USR_ID = #{usrId}
+		GROUP BY TRCK_NUM)
+		AND SYS_REG_DTIME > SYSDATE -14
+	</select>
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.hycu.mapper.MemberMapper">
+	<select id="getMemberById" parameterType="string" resultType="com.hycu.model.MemberVO">
+        SELECT  USR_ID AS usrId 
+        	   ,PASS_WD AS passWd 
+		FROM USR_BASE WHERE USR_ID = #{usrId}
+    </select>
+    
+    <insert id="insertUsrBase">
+    	INSERT INTO USR_BASE (
+    		 USR_ID
+    		,PASS_WD
+    		,USR_PHONE
+    		,USR_EMAIL
+    		,USR_BIRTH
+    		,SYS_REG_DTIME)
+		VALUES ( 
+			 #{usrId}
+			,#{passWd}
+			,#{usrPhone}
+			,#{usrEmail}
+			,#{usrBirth}
+			,SYSDATE
+				)
+    
+    </insert>
+    
+  </mapper>
+  

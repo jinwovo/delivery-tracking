@@ -1,0 +1,21 @@
+# build output
+hycuProject/target/
+
+# Eclipse workspace / WTP server configs
+.metadata/
+Servers/
+
+# Eclipse / IDE project files
+.classpath
+.project
+.settings/
+.springBeans
+.idea/
+*.iml
+
+# logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
